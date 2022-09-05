@@ -2,8 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:band_name/model/band.dart';
+
+import '../services/socket_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -22,6 +25,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final statusSocket = Provider.of<SocketService>(context);
     return Scaffold(
       appBar: AppBar(
         elevation: 1,
@@ -31,6 +35,21 @@ class _HomePageState extends State<HomePage> {
         ),
         backgroundColor: Colors.white,
         centerTitle: true,
+        actions: [
+          Center(
+            child: Text(
+              'Status server: ',
+              style:
+                  TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(right: 10),
+            child: statusSocket.socket.connected
+                ? Icon(Icons.check_circle, color: Colors.green[300])
+                : Icon(Icons.offline_bolt, color: Colors.red[300]),
+          )
+        ],
       ),
       body: ListView.builder(
         itemCount: bands.length,
