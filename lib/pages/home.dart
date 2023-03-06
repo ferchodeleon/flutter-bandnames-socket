@@ -16,12 +16,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Band> bands = [
-    // Band(id: '1', name: 'Planetshakers', votes: 5),
-    // Band(id: '2', name: 'Hillsong Young and free', votes: 1),
-    // Band(id: '3', name: 'Su presencia', votes: 2),
-    // Band(id: '4', name: 'Switchfood', votes: 5),
-  ];
+  List<Band> bands = [];
 
   @override
   void initState() {
@@ -82,6 +77,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _bandTitle(Band band) {
+    final socketService = Provider.of<SocketService>(context, listen: false);
     return Dismissible(
       key: Key(band.id),
       direction: DismissDirection.startToEnd,
@@ -111,7 +107,7 @@ class _HomePageState extends State<HomePage> {
           style: TextStyle(fontSize: 20),
         ),
         onTap: () {
-          print(band.name);
+          socketService.socket.emit('vote-band', {'id': band.id});
         },
       ),
     );
