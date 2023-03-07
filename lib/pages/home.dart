@@ -21,11 +21,13 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     final socketService = Provider.of<SocketService>(context, listen: false);
-    socketService.socket.on('active-bands', (bands) {
-      this.bands = (bands as List).map((band) => Band.fromMap(band)).toList();
-      setState(() {});
-    });
+    socketService.socket.on('active-bands', _handleActiveBands);
     super.initState();
+  }
+
+  _handleActiveBands(dynamic payload) {
+    this.bands = (payload as List).map((band) => Band.fromMap(band)).toList();
+    setState(() {});
   }
 
   @override
@@ -81,9 +83,8 @@ class _HomePageState extends State<HomePage> {
     return Dismissible(
       key: Key(band.id),
       direction: DismissDirection.startToEnd,
-      onDismissed: (_) {
-        socketService.socket.emit('delete-band', {"id": band.id});
-      },
+      onDismissed: (_) =>
+          socketService.socket.emit('delete-band', {"id": band.id}),
       background: Container(
         padding: EdgeInsets.only(left: 8.0),
         color: Colors.red,
@@ -105,9 +106,7 @@ class _HomePageState extends State<HomePage> {
           '${band.votes}',
           style: TextStyle(fontSize: 20),
         ),
-        onTap: () {
-          socketService.socket.emit('vote-band', {'id': band.id});
-        },
+        onTap: () => socketService.socket.emit('vote-band', {'id': band.id}),
       ),
     );
   }
@@ -117,7 +116,7 @@ class _HomePageState extends State<HomePage> {
     if (!Platform.isAndroid) {
       return showDialog(
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (_) => AlertDialog(
           title: Text('New band'),
           content: TextField(
             controller: textController,
