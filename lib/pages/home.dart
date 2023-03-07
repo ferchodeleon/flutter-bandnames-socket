@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:pie_chart/pie_chart.dart';
 import 'package:provider/provider.dart';
 
 import 'package:band_name/model/band.dart';
@@ -65,10 +66,18 @@ class _HomePageState extends State<HomePage> {
           )
         ],
       ),
-      body: ListView.builder(
-        itemCount: bands.length,
-        itemBuilder: (BuildContext context, int index) =>
-            _bandTitle(bands[index]),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _showGraph(),
+          Expanded(
+            child: ListView.builder(
+              itemCount: bands.length,
+              itemBuilder: (BuildContext context, int index) =>
+                  _bandTitle(bands[index]),
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         elevation: 1,
@@ -161,5 +170,60 @@ class _HomePageState extends State<HomePage> {
       socketService.socket.emit('add-band', {'name': name});
     }
     Navigator.pop(context);
+  }
+
+  Widget _showGraph() {
+    Map<String, double> dataMap = new Map();
+    bands.forEach(
+      (band) => dataMap.putIfAbsent(
+        band.name,
+        () => band.votes.toDouble(),
+      ),
+    );
+
+    final List<Color> colorList = [
+      Colors.blue[50]!,
+      Colors.blue[200]!,
+      Colors.green[50]!,
+      Colors.green[200]!,
+      Colors.red[50]!,
+      Colors.red[200]!,
+    ];
+
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.7,
+      height: MediaQuery.of(context).size.height * 0.25,
+      child: dataMap.isEmpty
+          ? null
+          : PieChart(
+              dataMap: dataMap,
+              animationDuration: Duration(milliseconds: 800),
+              chartLegendSpacing: 32,
+              chartRadius: MediaQuery.of(context).size.width / 2.2,
+              colorList: colorList,
+              initialAngleInDegree: 0,
+              chartType: ChartType.disc,
+              ringStrokeWidth: 32,
+              centerText: "Bands",
+              legendOptions: LegendOptions(
+                showLegendsInRow: false,
+                legendPosition: LegendPosition.right,
+                showLegends: true,
+                legendShape: BoxShape.circle,
+                legendTextStyle: TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              chartValuesOptions: ChartValuesOptions(
+                showChartValueBackground: true,
+                showChartValues: true,
+                showChartValuesInPercentage: false,
+                showChartValuesOutside: false,
+                decimalPlaces: 1,
+              ),
+              // gradientList: ---To add gradient colors---
+              // emptyColorGradient: ---Empty Color gradient---
+            ),
+    );
   }
 }
